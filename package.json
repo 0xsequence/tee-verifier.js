@@ -1,0 +1,53 @@
+{
+  "name": "tee-verifier",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "type": "module",
+  "description": "A library for verifying TEE enclave attestation",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "format": "prettier --list-different --write \"src/**/*.{ts,tsx,md}\"",
+    "postinstall": "lefthook install"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "tee",
+    "attestation",
+    "nitro",
+    "enclave"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0xsequence/tee-verifier-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xsequence/tee-verifier-ts/issues"
+  },
+  "homepage": "https://github.com/0xsequence/tee-verifier-ts#readme",
+  "devDependencies": {
+    "lefthook": "^1.11.11",
+    "prettier": "^3.5.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.1.2"
+  },
+  "dependencies": {
+    "cbor2": "^1.12.0",
+    "pkijs": "^3.2.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "lefthook"
+    ]
+  }
+}

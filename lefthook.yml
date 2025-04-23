@@ -1,0 +1,5 @@
+pre-commit:
+  commands:
+    prettier:
+      glob: 'src/**/*.{ts,tsx}'
+      run: pnpm prettier --write {staged_files} && git add {staged_files}
