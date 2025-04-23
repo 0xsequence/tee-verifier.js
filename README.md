@@ -5,7 +5,7 @@ TypeScript/JavaScript library for verifying TEE (Trusted Execution Environment) 
 ## Install
 
 ```
-npm install tee-verifier
+npm install @0xsequence/tee-verifier
 ```
 
 ## Usage
