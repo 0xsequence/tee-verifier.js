@@ -5,7 +5,7 @@ export interface AttestationVerifyOptions {
   rootCertFingerprint?: string
   checkDate?: Date
 
-  expectedPCRs?: Map<number, string>
+  expectedPCRs?: Map<number, string | string[]>
   verifyRootOfTrust?: boolean
   verifySignature?: boolean
   verifyNonce?: boolean
@@ -55,7 +55,14 @@ export function createAttestationVerifyingFetch(
     if (options.expectedPCRs) {
       for (const [pcr, expectedHash] of options.expectedPCRs.entries()) {
         const actualHash = att.pcrs.get(pcr)
-        if (actualHash !== expectedHash) {
+        if (!actualHash) {
+          throw new Error(`Missing PCR${pcr}`)
+        }
+        if (Array.isArray(expectedHash)) {
+          if (!expectedHash.includes(actualHash)) {
+            throw new Error(`Invalid PCR${pcr}: ${actualHash}`)
+          }
+        } else if (actualHash !== expectedHash) {
           throw new Error(`Invalid PCR${pcr}: ${actualHash}`)
         }
       }
