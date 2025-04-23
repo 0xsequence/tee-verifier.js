@@ -11,6 +11,7 @@ export interface AttestationVerifyOptions {
   verifyNonce?: boolean
   verifyContentHash?: boolean
 
+  fetch?: typeof window.fetch
   logTiming?: boolean
 }
 
@@ -36,6 +37,7 @@ export function createAttestationVerifyingFetch(
       }
     }
 
+    const fetch = options.fetch ?? window.fetch
     const res = await fetch(input, init)
     const attestationDoc = res.headers.get('x-attestation-document')
     if (!attestationDoc) {
