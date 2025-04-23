@@ -1,5 +1,5 @@
 {
-  "name": "tee-verifier",
+  "name": "@0xsequence/tee-verifier",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "type": "module",
@@ -29,12 +29,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/0xsequence/tee-verifier-ts.git"
+    "url": "https://github.com/0xsequence/tee-verifier.js.git"
   },
   "bugs": {
-    "url": "https://github.com/0xsequence/tee-verifier-ts/issues"
+    "url": "https://github.com/0xsequence/tee-verifier.js/issues"
   },
-  "homepage": "https://github.com/0xsequence/tee-verifier-ts#readme",
+  "homepage": "https://github.com/0xsequence/tee-verifier.js#readme",
   "devDependencies": {
     "lefthook": "^1.11.11",
     "prettier": "^3.5.3",
