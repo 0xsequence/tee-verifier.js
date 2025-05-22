@@ -8,8 +8,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "format": "prettier --list-different --write \"src/**/*.{ts,tsx,md}\"",
-    "postinstall": "lefthook install"
+    "format": "prettier --list-different --write \"src/**/*.{ts,tsx,md}\""
   },
   "exports": {
     ".": {
