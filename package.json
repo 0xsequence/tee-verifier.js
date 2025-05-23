@@ -5,6 +5,10 @@
   "type": "module",
   "description": "A library for verifying TEE enclave attestation",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false,
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
