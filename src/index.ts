@@ -15,19 +15,20 @@ export interface AttestationVerifyOptions {
   logTiming?: boolean
 }
 
-export function createAttestationVerifyingFetch(
-  options: AttestationVerifyOptions = {
+export function createAttestationVerifyingFetch(options: AttestationVerifyOptions = {}): typeof window.fetch {
+  const mergedOptions = {
+    ...options,
     // From https://docs.aws.amazon.com/enclaves/latest/user/verify-root.html#validation-process
     rootCertFingerprint: '641a0321a3e244efe456463195d606317ed7cdcc3c1756e09893f3c68f79bb5b',
     verifyRootOfTrust: true,
     verifySignature: true,
     verifyNonce: true,
     verifyContentHash: true,
-  },
-): typeof window.fetch {
+  }
+
   return async (input: RequestInfo | URL, init: RequestInit = {}) => {
     let expectedNonce = ''
-    if (options.verifyNonce) {
+    if (mergedOptions.verifyNonce) {
       const nonceArray = new Uint8Array(12)
       crypto.getRandomValues(nonceArray)
       expectedNonce = btoa(String.fromCharCode.apply(null, [...nonceArray]))
@@ -37,7 +38,7 @@ export function createAttestationVerifyingFetch(
       }
     }
 
-    const fetch = options.fetch ?? window.fetch
+    const fetch = mergedOptions.fetch ?? window.fetch
     const res = await fetch(input, init)
     const attestationDoc = res.headers.get('x-attestation-document')
     if (!attestationDoc) {
@@ -49,11 +50,11 @@ export function createAttestationVerifyingFetch(
 
     const att = SignedAttestation.fromDocument(attestationDoc)
 
-    if (options.verifyNonce && att.nonce !== expectedNonce) {
+    if (mergedOptions.verifyNonce && att.nonce !== expectedNonce) {
       throw new Error('Invalid nonce')
     }
-    if (options.expectedPCRs) {
-      for (const [pcr, expectedHash] of options.expectedPCRs.entries()) {
+    if (mergedOptions.expectedPCRs) {
+      for (const [pcr, expectedHash] of mergedOptions.expectedPCRs.entries()) {
         const actualHash = att.pcrs.get(pcr)
         if (!actualHash) {
           throw new Error(`Missing PCR${pcr}`)
@@ -67,23 +68,23 @@ export function createAttestationVerifyingFetch(
         }
       }
     }
-    if (options.verifyRootOfTrust) {
-      const valid = await att.verifyRootOfTrust(options.checkDate)
+    if (mergedOptions.verifyRootOfTrust) {
+      const valid = await att.verifyRootOfTrust(mergedOptions.checkDate)
       if (!valid) {
         throw new Error('Invalid root of trust')
       }
       const actualFingerprint = await att.rootCertFingerprint()
-      if (options.rootCertFingerprint && actualFingerprint !== options.rootCertFingerprint) {
+      if (mergedOptions.rootCertFingerprint && actualFingerprint !== mergedOptions.rootCertFingerprint) {
         throw new Error(`Invalid root certificate fingerprint: ${actualFingerprint}`)
       }
     }
-    if (options.verifySignature) {
+    if (mergedOptions.verifySignature) {
       const valid = await att.verifySignature()
       if (!valid) {
         throw new Error('Invalid signature')
       }
     }
-    if (options.verifyContentHash && att.userData.startsWith('Sequence/1:')) {
+    if (mergedOptions.verifyContentHash && att.userData.startsWith('Sequence/1:')) {
       const attHash = att.userData.split(':')[1]
       const method = init.method ?? 'GET'
 
@@ -110,7 +111,7 @@ export function createAttestationVerifyingFetch(
       }
     }
 
-    if (options.logTiming) {
+    if (mergedOptions.logTiming) {
       const endTime = performance.now()
       const timeTaken = endTime - startTime
       console.log(`Attestation verification took ${timeTaken.toFixed(2)}ms`)
