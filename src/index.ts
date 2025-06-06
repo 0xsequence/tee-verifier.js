@@ -98,15 +98,12 @@ export function createAttestationVerifyingFetch(options: AttestationVerifyOption
       const path = url.pathname
 
       const reqBody = init.body ?? ''
-      const resBody = await res.text()
+      const resBody = await res.clone().text()
 
       const buffer = new TextEncoder().encode(`${method} ${path}\n${reqBody}\n${resBody}`)
       const expectedHash = await crypto.subtle.digest('SHA-256', buffer)
-      const expectedHashHex = Array.from(new Uint8Array(expectedHash))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('')
 
-      if (attHash !== expectedHashHex) {
+      if (attHash !== btoa(String.fromCharCode.apply(null, [...new Uint8Array(expectedHash)]))) {
         throw new Error('Invalid user data hash')
       }
     }
