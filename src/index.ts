@@ -84,8 +84,7 @@ export function createAttestationVerifyingFetch(options: AttestationVerifyOption
         throw new Error('Invalid signature')
       }
     }
-    if (mergedOptions.verifyContentHash && att.userData.startsWith('Sequence/1:')) {
-      const attHash = att.userData.split(':')[1]
+    if (mergedOptions.verifyContentHash) {
       const method = init.method ?? 'GET'
 
       let url: URL
@@ -97,15 +96,10 @@ export function createAttestationVerifyingFetch(options: AttestationVerifyOption
       }
       const path = url.pathname
 
-      const reqBody = init.body ?? ''
+      const reqBody = `${init.body ?? ''}`
       const resBody = await res.clone().text()
 
-      const buffer = new TextEncoder().encode(`${method} ${path}\n${reqBody}\n${resBody}`)
-      const expectedHash = await crypto.subtle.digest('SHA-256', buffer)
-
-      if (attHash !== btoa(String.fromCharCode.apply(null, [...new Uint8Array(expectedHash)]))) {
-        throw new Error('Invalid user data hash')
-      }
+      await verifyUserData(att.userData, { method, path, headers: init.headers, reqBody, resBody })
     }
 
     if (mergedOptions.logTiming) {
@@ -115,6 +109,39 @@ export function createAttestationVerifyingFetch(options: AttestationVerifyOption
     }
 
     return res
+  }
+}
+
+/**
+ * Verifies the `Sequence/<N>:<base64(SHA-256(preimage))>` user data against the request/response.
+ * - N=1: preimage = `METHOD PATH\nreqBody\nresBody`
+ * - N=2: preimage = `METHOD PATH\nOms-Wallet-Signature\nreqBody\nresBody` (header value, or "" if absent)
+ * Throws on any other format or version.
+ */
+export async function verifyUserData(
+  userData: string,
+  req: { method: string; path: string; headers?: HeadersInit; reqBody: string; resBody: string },
+) {
+  const match = /^Sequence\/(\d+):(.*)$/s.exec(userData)
+  if (!match) {
+    throw new Error(`Invalid user data: ${userData}`)
+  }
+  let preimage: string
+  switch (match[1]) {
+    case '1':
+      preimage = `${req.method} ${req.path}\n${req.reqBody}\n${req.resBody}`
+      break
+    case '2': {
+      const sig = new Headers(req.headers).get('Oms-Wallet-Signature') ?? ''
+      preimage = `${req.method} ${req.path}\n${sig}\n${req.reqBody}\n${req.resBody}`
+      break
+    }
+    default:
+      throw new Error(`Unsupported user data version: Sequence/${match[1]}`)
+  }
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(preimage))
+  if (match[2] !== btoa(String.fromCharCode.apply(null, [...new Uint8Array(hash)]))) {
+    throw new Error('Invalid user data hash')
   }
 }
 

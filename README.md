@@ -33,6 +33,9 @@ The following options are available:
 - `verifySignature` - whether the attestation signature should be verified
 - `verifyNonce` - whether the nonce in the attestation should be compared against the nonce sent in the request
 - `verifyContentHash` - whether the hash in the attestation should be compared against the calculated hash of the request/response
+  The attestation's `user_data` must be `Sequence/<N>:<base64(SHA-256(preimage))>`; any other prefix or version fails verification. Supported versions:
+  - `Sequence/1`: preimage is `METHOD PATH\n<request body>\n<response body>`
+  - `Sequence/2`: preimage is `METHOD PATH\n<Oms-Wallet-Signature header>\n<request body>\n<response body>`, where the header value is the one sent with the request, or empty if the request had none
 - `logTiming` - whether the debug timing should be logged to the console
 
 Otherwise, you can also verify it manually:
