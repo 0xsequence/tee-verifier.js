@@ -43,7 +43,7 @@
     "lefthook": "^1.11.11",
     "prettier": "^3.5.3",
     "typescript": "^5.7.3",
-    "vitest": "^3.1.2"
+    "vitest": "^3.2.7"
   },
   "dependencies": {
     "cbor2": "^1.12.0",
